@@ -5,97 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>电影种子下载</title>
     <style>
-        /* 状态指示器样式 */
-        #status-indicator {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-left: 10px;
+        .div1 {
+            margin: 0 auto;
+            width: 200px;
+            height: 100px;
+            border: 1px solid #000;
+            position: fixed;
+            float: left;
+            color: red;
+            background-color: rgba(0, 0, 0, 0.5);
         }
 
-        .green { background-color: green; }
-        .red { background-color: red; }
     </style>
 </head>
 <body>
-
+    <div class="div1">
     <!-- 按钮用于启动pachong -->
     <button onclick="startpachong()">开启下载</button>
     <!-- 按钮用于停止pachong -->
     <button onclick="stoppachong()">关闭下载</button>
     <!-- 显示状态指示器 -->
-    <div id="status-indicator" class=""style="border:1px solid;"></div>
-    <h1 id="backend-variable2">{{ backend_variable2 }}</h1>
+        <div class="div2">
+            <h3 id="status_info" >{{ backend_variable2 }}</h3>
+        </div>
+    </div>
     <!-- 显示日志内容 -->
     <pre id="log-content" style="border:1px solid;">{{ log_content }}</pre>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
 
-
         // 连接到Socket.IO服务器
         var socket = io.connect('http://' + document.domain + ':' + location.port);
 
-        // 获取状态指示器元素
-        var statusIndicator = document.getElementById('status-indicator');
-
-        // 页面加载时获取初始状态颜色并设置
-        socket.on('update_status_color', function(color) {
-            statusIndicator.classList.add = color;
-        });
         // 监听状态栏事件
         socket.on('updated_variable2', function(new_value) {
-            document.getElementById('backend-variable2').innerText = new_value;
+            document.getElementById('status_info').innerText = new_value;
         });
         // 监听更新日志事件
         socket.on('update_log', function(data) {
-            document.getElementById('log-content').innerText = data;
+            document.getElementById('log-content').innerText = data ;
         });
-        // 定时器，每秒钟获取一次状态
-        setInterval(function() {
-            // 发送AJAX请求到后端获取状态
-            var xhr = new XMLHttpRequest();
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    var data = JSON.parse(xhr.responseText);
-                    updateStatus(data.status);
-                }
-            };
-            xhr.open("GET", "/get_status", true);
-            xhr.send();
-        }, 1000);
 
         // 函数用于启动pachong
         function startpachong() {
             // 发送启动pachong事件
             socket.emit('start_pachong');
-            // 移除红色样式，添加绿色样式
-            statusIndicator.classList.remove('red');
-            statusIndicator.classList.add('green');
         }
 
         // 函数用于停止pachong
         function stoppachong() {
             // 发送停止pachong事件
             socket.emit('stop_pachong');
-            // 移除绿色样式，添加红色样式
-            statusIndicator.classList.remove('green');
-            statusIndicator.classList.add('red');
         }
-        // 更新状态文本和指示器颜色
-        function updateStatus(status) {
 
-            var statusIndicator = document.getElementById('status-indicator');
-
-            if (status) {
-
-                statusIndicator.style.backgroundColor = 'green';
-            } else {
-
-                statusIndicator.style.backgroundColor = 'red';
-            }
-        }
     </script>
 
 

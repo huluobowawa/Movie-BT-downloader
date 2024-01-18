@@ -168,7 +168,7 @@ class Movies:
                         logger.info(f"Torrent文件已保存到：{local_file_path}")
                         with open(txt_file_path, "a") as txt_file:
                             txt_file.write(movie_name + "\n")
-                            logger.info(f"文件 '{movie_name}' 下载完成，并已记录。")
+                            logger.debug(f"文件 '{movie_name}' 下载完成，并已记录。")
 
                     else:
                         logger.debug(f"文件 '{movie_name}' 已经下载过，跳过下载。")
