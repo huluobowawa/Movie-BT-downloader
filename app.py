@@ -1,14 +1,14 @@
+import threading
+import time
+
 from flask import Flask, render_template
 from flask_socketio import SocketIO
-import os
-import time
-import threading
-from log import *
+
 import pachong
+from log import *
 
 app = Flask(__name__)
 socketio = SocketIO(app)
-# logging_active = True  # 默认为True，表示启动应用程序时开始日志记录
 thread = None
 STATUS_COLOR = "green"  # 初始颜色为绿色
 
@@ -37,27 +37,14 @@ def index():
     log_content = read_log_file()
     return render_template('index.html', log_content=log_content)
 
-
-# # 客户端连接成功时执行的函数
-# @socketio.on('connect')
-# def handle_connect():
-#     # 客户端连接成功时执行的函数
-#     global STATUS_COLOR
-#
-#     while True:
-#         time.sleep(0.5)  # 每秒钟刷新两次日志文件内容
-#         log_content = read_log_file()  # 读取日志文件内容
-#         socketio.emit('update_log', log_content)  # 发送更新日志的内容给客户端
-#         if pachong.run_status:  # 如果pachong运行状态为True
-#             STATUS_COLOR = "green"  # 状态颜色为绿色
-#         else:
-#             STATUS_COLOR = "red"  # 状态颜色为红色
-#         socketio.emit('update_status_color', STATUS_COLOR)  # 发送更新状态颜色的内容给客户端
-#         if pachong.run_status:
-#             status_info = "正在运行"
-#         else:
-#             status_info = "未运行"
-#         socketio.emit('update_status_info', status_info)
+@app.route('/get_status')
+def get_status():
+    if pachong.run_status:
+        STATUS_COLOR = "green"
+        return {"status": pachong.run_status, "status_color": STATUS_COLOR}
+    else:
+        STATUS_COLOR = "red"
+    return {"status": pachong.run_status, "status_color": STATUS_COLOR}
 
 
 
@@ -70,11 +57,13 @@ def background_thread():
         status_info = "正在运行" if pachong.run_status else "未运行"
         socketio.emit('update_status_info', status_info)
 
+
 @socketio.on('connect')
 def handle_connect():
     global STATUS_COLOR
     socketio.emit('update_status_color', STATUS_COLOR)
     threading.Thread(target=background_thread).start()
+
 
 @socketio.on('update_backend_variable2')
 def update_backend_variable2(new_value):
@@ -110,32 +99,6 @@ def pc_thread():
     pc.start()
 
 
-# # 启动爬虫
-# @socketio.on('start_pachong')
-# def start_pachong():
-#     print('爬虫启动')
-#
-#
-# # 停止爬虫
-# @socketio.on('stop_pachong')
-# def stop_logging():
-#     print('单击爬虫关闭按钮')
-#
-#
-#
-#
-
-
-
-
-
-
-
-
-
-
-
-
 # 启动爬虫
 @socketio.on('start_pachong')
 def start_pachong():
@@ -164,4 +127,4 @@ def stop_logging():
 # 启动Flask和SocketIO服务器
 if __name__ == '__main__':
     pc_thread()
-    socketio.run(app, debug=True, use_reloader=False, allow_unsafe_werkzeug=True)
+    socketio.run(app, use_reloader=False, allow_unsafe_werkzeug=True, port=pachong.web_post,host=pachong.web_host)

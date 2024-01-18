@@ -8,9 +8,8 @@
 @time: 2024/1/17 18:28
 """
 import logging
-from logging.handlers import RotatingFileHandler
 import os
-
+from logging.handlers import RotatingFileHandler
 
 # 创建一个logger对象
 logger = logging.getLogger(__name__)  # 建议使用__name__获取当前模块名作为logger的名称
@@ -31,7 +30,7 @@ file_handler.setLevel(logging.INFO)  # 可以为不同的处理器设置不同�
 
 # 创建一个控制台处理器（将日志打印到屏幕）
 console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.DEBUG)  # 控制台输出所有DEBUG及更高级别的日志
+console_handler.setLevel(logging.INFO)  # 控制台输出所有DEBUG及更高级别的日志
 
 # 创建一个日志格式器
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
