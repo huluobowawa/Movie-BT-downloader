@@ -37,6 +37,7 @@ def index():
     log_content = read_log_file()
     return render_template('index.html', log_content=log_content)
 
+
 @app.route('/get_status')
 def get_status():
     if pachong.run_status:
@@ -47,13 +48,12 @@ def get_status():
     return {"status": pachong.run_status, "status_color": STATUS_COLOR}
 
 
-
 def background_thread():
     while True:
         time.sleep(0.5)
         log_content = pachong.read_log_file()
         socketio.emit('update_log', log_content)
-        socketio.emit('update_status_color', STATUS_COLOR)
+        socketio.emit('update_status_color', STATUS_COLOR,pachong.run_status)
         status_info = "正在运行" if pachong.run_status else "未运行"
         socketio.emit('update_status_info', status_info)
 
@@ -94,9 +94,12 @@ def background_thread():
 def pc_thread():
     # 创建一个线程对象pc
     pc = threading.Thread(target=pachong.run)
+    ht = threading.Thread(target=background_thread)
     # 启动线程
     logging.debug("爬虫主线程启动中...")
     pc.start()
+    logging.debug("后台主线程启动中...")
+    ht.start()
 
 
 # 启动爬虫
@@ -127,4 +130,4 @@ def stop_logging():
 # 启动Flask和SocketIO服务器
 if __name__ == '__main__':
     pc_thread()
-    socketio.run(app, use_reloader=False, allow_unsafe_werkzeug=True, port=pachong.web_post,host=pachong.web_host)
+    socketio.run(app, use_reloader=False, allow_unsafe_werkzeug=True, port=pachong.web_post, host=pachong.web_host)

@@ -194,7 +194,7 @@ def run():
     # 调用爬虫函数
     while True:
         if run_status:
-            logger.info("爬虫运行中")
+            logger.debug("爬虫运行中")
 
             create_download_log_file()  # 创建已下载电影列表
             # Movies().get_list()  # 获取需要下载的电影列表
