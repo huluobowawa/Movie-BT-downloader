@@ -7,22 +7,20 @@
 @file: pachong.py
 @time: 2023/12/28 16:51
 """
-from typing import List, Any
-
-from log import *
-import os
 import re
-import ssl
 import sys
 import time
+from typing import Any, List
 
 import requests
 import urllib3
 from bs4 import BeautifulSoup
 
+from log import *
+
 urllib3.disable_warnings()
 
-ssl._create_default_https_context = ssl._create_unverified_context
+# ssl._create_default_https_context = ssl._create_unverified_context
 
 save_directory = "M:\download\种子\爬取的种子"  # 保存目录
 target_url = "http://www.btbtt12.com/forum-index-fid-951-page-{}.htm"  # 爬取网址
@@ -30,10 +28,8 @@ page_nums = 6  # 爬取页数，默认是4，一页50条
 sleep_time = 1200  # 等待时间-默认30分钟
 run_status = True
 a_url = 'http://www.btbtt12.com/'
-# 初始化一个空字典列表
-movies_list = []
-
-
+web_post = 5020  # 网站端口
+web_host = '127.0.0.1'  # 网站地址
 
 
 class Movies:
@@ -65,10 +61,9 @@ class Movies:
             # 发送HTTP请求
             try:
                 response = requests.get(url, verify=False)
-            except :
-                logger.error("获取页面失败",url)
+            except:
+                logger.error("获取页面失败", url)
                 continue
-
 
             # 检查请求是否成功
             if response.status_code == 200:
@@ -90,9 +85,9 @@ class Movies:
             txt_file_path = os.path.join("已下载的种子.txt")
             if Movies.is_unique_name(movies_list, dictionary['movie_name'], txt_file_path):
                 movies_list.append(dictionary)
-                logger.debug(f"已添加电影名为 {dictionary['movie_name']} 的电影.")
+                logger.debug(f"已添加电影 {dictionary['movie_name']} 的进入下载列表.")
             else:
-                logger.debug(f"电影名为 {dictionary['movie_name']} 已存在.")
+                logger.debug(f"电影 {dictionary['movie_name']} 已存在.")
         else:
             logger.debug("字典必须有一个“movie_name”键.")
 
@@ -119,7 +114,7 @@ class Movies:
 
         return id_to_check not in downloaded_movies
 
-    def get_movie_bt_download_url(self):
+    def get_movie_bt_download_url(self, movies_list):
         """
         获取电影BT下载链接
         :param movies_list: 电影列表
@@ -138,11 +133,10 @@ class Movies:
                         movie_name = movie_info['movie_name']  # 获取电影名称
                         self.dow_torrent(url, movie_name)  # 处理链接和电影名称
                 else:
-                    logger.info("没有找到下载链接")
+                    logger.info(f"没有找到下载链接",movie_info['movie_name'])
 
             except Exception as e:
                 logger.info("电影的种子下载完毕", e)  # 记录异常信息
-
 
     def dow_torrent(self, url, movie_name):
         save_path = save_directory + movie_name + '.torrent'
@@ -174,7 +168,7 @@ class Movies:
                         logger.info(f"Torrent文件已保存到：{local_file_path}")
                         with open(txt_file_path, "a") as txt_file:
                             txt_file.write(movie_name + "\n")
-                            logger.info(f"文件 '{movie_name}' 下载完成，并已记录。")
+                            logger.debug(f"文件 '{movie_name}' 下载完成，并已记录。")
 
                     else:
                         logger.debug(f"文件 '{movie_name}' 已经下载过，跳过下载。")
@@ -200,11 +194,11 @@ def run():
     # 调用爬虫函数
     while True:
         if run_status:
-            logger.info("爬虫运行中")
+            logger.debug("爬虫运行中")
 
             create_download_log_file()  # 创建已下载电影列表
-            Movies().get_list()  # 获取需要下载的电影列表
-            Movies().get_movie_bt_download_url()  # 下载种子
+            # Movies().get_list()  # 获取需要下载的电影列表
+            Movies().get_movie_bt_download_url(Movies().get_list())  # 下载种子
             try:
                 # 等待时间-默认30分钟
                 logger.info("爬虫开始休息")
