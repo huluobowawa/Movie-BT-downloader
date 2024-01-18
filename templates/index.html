@@ -7,7 +7,7 @@
     <style>
         .div1 {
             margin: 0 auto;
-            width: 200px;
+            width: 230px;
             height: 100px;
             border: 1px solid #000;
             position: fixed;
@@ -24,6 +24,7 @@
     <button onclick="startpachong()">开启下载</button>
     <!-- 按钮用于停止pachong -->
     <button onclick="stoppachong()">关闭下载</button>
+        <button onclick="exit_def()">关闭程序</button>
     <!-- 显示状态指示器 -->
         <div class="div2">
             <h3 id="status_info" >{{ backend_variable2 }}</h3>
@@ -57,6 +58,10 @@
         function stoppachong() {
             // 发送停止pachong事件
             socket.emit('stop_pachong');
+        }
+        function exit_def() {
+            // 发送退出程序事件
+            socket.emit('exit_def');
         }
 
     </script>

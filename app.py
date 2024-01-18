@@ -1,5 +1,7 @@
+import os
 import threading
 import time
+import signal
 
 from flask import Flask, render_template
 from flask_socketio import SocketIO
@@ -10,6 +12,7 @@ from log import *
 app = Flask(__name__)
 socketio = SocketIO(app)
 thread = None
+pid = os.getpid() # 获取当前进程的PID
 
 
 # 读取日志文件
@@ -81,6 +84,18 @@ def stop_logging():
         pachong.run_status = False  # 将pachong的运行状态设置为True
         # 添加开始记录进程的代码
         pachong.logger.info("爬虫关闭中...")
+
+
+# 退出程序
+@socketio.on('exit_def')
+def exit_def():
+    logging.debug("单击退出按钮...")
+    pachong.run_status = False
+    pachong.logger.info("爬虫关闭中...")
+    print(4)
+    os._exit(0)
+    print(5)
+    os.kill(pid, signal.SIGTERM)  # 主动结束指定ID的程序运行
 
 
 # 启动Flask和SocketIO服务器
