@@ -22,11 +22,11 @@ urllib3.disable_warnings()
 
 # ssl._create_default_https_context = ssl._create_unverified_context
 
-save_directory = "M:\download\种子\爬取的种子"  # 保存目录
+save_directory = "d:\爬取的种子"  # 保存目录
 target_url = "http://www.btbtt12.com/forum-index-fid-951-page-{}.htm"  # 爬取网址
 page_nums = 6  # 爬取页数，默认是4，一页50条
 sleep_time = 1200  # 等待时间-默认30分钟
-run_status = True
+run_status = True  # 爬取状态，默认为True，程序开启时自动开启爬虫。为False时，程序不会开启爬虫。
 a_url = 'http://www.btbtt12.com/'
 web_post = 5020  # 网站端口
 web_host = '127.0.0.1'  # 网站地址
