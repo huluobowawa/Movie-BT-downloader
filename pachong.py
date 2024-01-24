@@ -131,6 +131,8 @@ class Movies:
                     for link in links:
                         url = a_url + (link.get('href'))  # 获取链接地址
                         movie_name = movie_info['movie_name']  # 获取电影名称
+                        print(url, movie_name)
+
                         self.dow_torrent(url, movie_name)  # 处理链接和电影名称
                 else:
                     logger.info(f"没有找到下载链接",movie_info['movie_name'])
@@ -142,8 +144,23 @@ class Movies:
         save_path = save_directory + movie_name + '.torrent'
 
         # 下载 .torrent 文件
-        response = requests.get(url, verify=False)
+        response = requests.get(url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        # print(response.content)
+        links = soup.find_all('a', href=lambda href: href and 'attach-download' in href)
+        # print(links)
+        # 使用正则表达式提取 href 内容
 
+        t_dow_url = re.search(r'href="(.*?)"', str(links))
+
+        # 检查是否有匹配
+        if t_dow_url:
+            url_content = t_dow_url.group(1)
+            # print(url_content)
+        else:
+            print('No match found.')
+        url_content = a_url + url_content
+        response = requests.get(url_content)
         # 确保下载文件夹存在，如果不存在则创建
         os.makedirs(save_directory, exist_ok=True)
         if not os.path.exists(save_directory):
@@ -173,7 +190,7 @@ class Movies:
                     else:
                         logger.debug(f"文件 '{movie_name}' 已经下载过，跳过下载。")
         except Exception as e:
-            logger.info("下载完毕，等待下一个循环", e)
+            logger.info("下载完毕，等待下一个循环", e, movie_name)
 
 
 def create_download_log_file():  # 创建已下载电影列表
@@ -201,7 +218,8 @@ def run():
             Movies().get_movie_bt_download_url(Movies().get_list())  # 下载种子
             try:
                 # 等待时间-默认30分钟
-                logger.info("爬虫开始休息")
+                logger.debug("爬虫开始休息")
+                print("爬虫开始休息")
                 for i in range(sleep_time):
                     time.sleep(1)
                     if i % 30 == 0:
@@ -209,7 +227,8 @@ def run():
                     if not run_status:
                         break
                 else:
-                    logger.info("爬虫等待完成")
+                    logger.debug("爬虫等待完成")
+                    print("爬虫结束休息")
             except Exception as e:
                 logger.error(f"发生异常：{e}")
                 sys.exit("爬虫被中断")  # 等待时间-默认30分钟
